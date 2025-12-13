@@ -109,8 +109,14 @@ th,td{border-bottom:1px solid #ddd; padding:6px}
       <option value="e">e</option>
       <option value="other">Outra</option>
     </select>
+
     <div id="otherBaseWrap">
       <input id="otherBase" placeholder="Digite a base">
+    </div>
+
+    <button onclick="gerar()">Gerar</button>
+
+    <div class="preview" id="preview"></div>
     </div>
     <input id="precision" type="number" value="3">
     <button onclick="gerar()">Gerar</button>
