@@ -1,10 +1,10 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gerador de Tabela de Logaritmos</title>
 
-<!-- SheetJS -->
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -13,9 +13,13 @@ body{margin:0;background:#f3f4f6;color:#111}
 
 /* ===== LOGIN ===== */
 #login-screen{
-  position:fixed; inset:0;
-  display:flex; justify-content:center; align-items:center;
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   background:#000;
+  z-index:999;
 }
 #login-box{
   background:#0a0a0a;
@@ -27,14 +31,21 @@ body{margin:0;background:#f3f4f6;color:#111}
   text-align:center;
 }
 #login-box input{
-  width:90%; padding:10px; margin:8px 0;
-  border-radius:6px; border:none;
-  background:#111; color:#0ff;
+  width:90%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:none;
+  background:#111;
+  color:#0ff;
 }
 #login-box button{
-  width:95%; padding:10px;
-  background:#00eaff; border:none;
-  border-radius:6px; font-weight:bold;
+  width:95%;
+  padding:10px;
+  background:#00eaff;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
   cursor:pointer;
 }
 
@@ -69,7 +80,8 @@ body{margin:0;background:#f3f4f6;color:#111}
 h1{margin:0 0 12px;font-size:20px}
 label{display:block;margin-top:10px;font-size:13px}
 input,select{
-  width:100%; padding:8px;
+  width:100%;
+  padding:8px;
   margin-top:6px;
   border-radius:6px;
   border:1px solid #d1d5db
@@ -97,13 +109,14 @@ th,td{
   text-align:right
 }
 th{text-align:left}
-.small{font-size:13px;color:#374151}
 
 /* ===== ADMIN ===== */
 #admin-panel{
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,0.95);
   display:none;
+  z-index:1000;
 }
 .admin-box{
   max-width:500px;
@@ -129,7 +142,6 @@ th{text-align:left}
     <h2>🔐 Login</h2>
     <input id="user" placeholder="Usuário">
     <input id="pass" type="password" placeholder="Senha">
-    <label><input type="checkbox" id="remember"> Lembrar login</label>
     <button onclick="login()">Entrar</button>
   </div>
 </div>
@@ -180,7 +192,7 @@ th{text-align:left}
   <div class="admin-box">
     <button onclick="fecharAdmin()">❌</button>
     <h2>Painel Admin</h2>
-    <div id="lista-usuarios"></div>
+    <div id="listaUsuarios"></div>
     <input id="novoUser" placeholder="Novo usuário">
     <input id="novoPass" placeholder="Senha">
     <button onclick="criarUsuario()">Criar usuário</button>
@@ -188,28 +200,41 @@ th{text-align:left}
 </div>
 
 <script>
-/* ===== USUÁRIOS ===== */
+/* ===== BANCO ===== */
 let banco = JSON.parse(localStorage.getItem("usuarios")) || {};
 if(!banco.CLX){
   banco.CLX = {senha:"02072007", bloqueado:false};
   localStorage.setItem("usuarios", JSON.stringify(banco));
 }
 
+/* ===== LOGIN AUTO ===== */
+document.addEventListener("DOMContentLoaded", ()=>{
+  const logado = localStorage.getItem("logado");
+  if(logado){
+    login-screen.style.display="none";
+    main.style.display="block";
+    if(logado==="CLX") adminBtn.style.display="inline";
+  }
+});
+
 /* ===== LOGIN ===== */
 function login(){
-  const u=user.value, p=pass.value;
-  banco=JSON.parse(localStorage.getItem("usuarios"))||{};
+  const u = user.value.trim();
+  const p = pass.value;
+  banco = JSON.parse(localStorage.getItem("usuarios"));
+
   if(!banco[u]) return alert("Usuário não existe");
   if(banco[u].senha!==p) return alert("Senha incorreta");
   if(banco[u].bloqueado) return alert("Usuário bloqueado");
 
   localStorage.setItem("logado",u);
-  document.getElementById("login-screen").style.display="none";
-  document.getElementById("main").style.display="block";
+  login-screen.style.display="none";
+  main.style.display="block";
 
-  if(u==="CLX") document.getElementById("adminBtn").style.display="inline";
+  if(u==="CLX") adminBtn.style.display="inline";
 }
 
+/* ===== SAIR ===== */
 function sair(){
   localStorage.removeItem("logado");
   location.reload();
@@ -240,24 +265,29 @@ function baixar(){
 /* ===== ADMIN ===== */
 function abrirAdmin(){
   atualizarUsuarios();
-  document.getElementById("admin-panel").style.display="block";
+  admin-panel.style.display="block";
 }
 function fecharAdmin(){
-  document.getElementById("admin-panel").style.display="none";
+  admin-panel.style.display="none";
 }
 function atualizarUsuarios(){
   banco=JSON.parse(localStorage.getItem("usuarios"));
-  lista-usuarios.innerHTML="";
+  listaUsuarios.innerHTML="";
   for(let u in banco){
-    lista-usuarios.innerHTML+=`
+    listaUsuarios.innerHTML+=`
       <div class="user-card">
         ${u}
-        <button onclick="delete banco['${u}'];localStorage.setItem('usuarios',JSON.stringify(banco));atualizarUsuarios()">Excluir</button>
+        ${u!=="CLX"?`<button onclick="excluirUsuario('${u}')">Excluir</button>`:""}
       </div>`;
   }
 }
 function criarUsuario(){
   banco[novoUser.value]={senha:novoPass.value,bloqueado:false};
+  localStorage.setItem("usuarios",JSON.stringify(banco));
+  atualizarUsuarios();
+}
+function excluirUsuario(u){
+  delete banco[u];
   localStorage.setItem("usuarios",JSON.stringify(banco));
   atualizarUsuarios();
 }
