@@ -1,144 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Gerador de Tabela de Logaritmos</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Logaritmos</title>
 
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-body{margin:0;background:#f3f4f6;color:#111}
+body{margin:0;font-family:Arial;background:#f3f4f6}
 
-/* ===== LOGIN ===== */
-#login-screen{
-  position:fixed;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#000;
-  z-index:999;
+/* LOGIN */
+#loginScreen{
+  position:fixed; inset:0;
+  display:flex; justify-content:center; align-items:center;
+  background:#000; z-index:1000;
 }
-#login-box{
-  background:#0a0a0a;
-  padding:30px;
-  width:360px;
-  border-radius:12px;
-  box-shadow:0 0 30px #00f7ff;
-  color:#0ff;
-  text-align:center;
+#loginBox{
+  background:#0a0a0a; color:#0ff;
+  padding:30px; width:320px;
+  border-radius:12px; text-align:center;
+  box-shadow:0 0 25px #00f7ff;
 }
-#login-box input{
-  width:90%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:none;
-  background:#111;
-  color:#0ff;
+#loginBox input{
+  width:90%; padding:10px; margin:8px 0;
+  border:none; border-radius:6px;
+  background:#111; color:#0ff;
 }
-#login-box button{
-  width:95%;
-  padding:10px;
-  background:#00eaff;
-  border:none;
-  border-radius:6px;
-  font-weight:bold;
+#loginBox button{
+  width:95%; padding:10px;
+  background:#00eaff; border:none;
+  border-radius:6px; font-weight:bold;
   cursor:pointer;
 }
 
-/* ===== TOPO ===== */
+/* TOPO */
 .topbar{
-  background:#000;
-  color:#0ff;
+  background:#000; color:#0ff;
   padding:10px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.topbar button{
-  background:none;
-  border:none;
-  color:#0ff;
-  font-size:16px;
-  cursor:pointer;
-  margin-left:10px;
+  display:flex; justify-content:space-between;
 }
 
-/* ===== SISTEMA ===== */
+/* SISTEMA */
 #main{display:none}
 .container{
   max-width:900px;
   margin:40px auto;
-  padding:24px;
   background:white;
+  padding:24px;
   border-radius:12px;
-  box-shadow:0 6px 24px rgba(2,6,23,0.08)
 }
-h1{margin:0 0 12px;font-size:20px}
-label{display:block;margin-top:10px;font-size:13px}
-input,select{
-  width:100%;
-  padding:8px;
-  margin-top:6px;
-  border-radius:6px;
-  border:1px solid #d1d5db
-}
-.row{display:flex;gap:12px}
+.row{display:flex; gap:10px}
 .row>*{flex:1}
-button{
-  margin-top:14px;
-  padding:10px 14px;
-  border-radius:8px;
-  border:0;
-  background:#2563eb;
-  color:white;
-  font-weight:600;
-  cursor:pointer
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:18px
-}
-th,td{
-  padding:6px 8px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:right
-}
-th{text-align:left}
+button{margin-top:10px; padding:10px}
+table{width:100%; border-collapse:collapse; margin-top:15px}
+th,td{border-bottom:1px solid #ddd; padding:6px}
 
-/* ===== ADMIN ===== */
-#admin-panel{
-  position:fixed;
-  inset:0;
+/* ADMIN */
+#adminPanel{
+  position:fixed; inset:0;
   background:rgba(0,0,0,0.95);
-  display:none;
-  z-index:1000;
+  display:none; z-index:2000;
 }
-.admin-box{
+.adminBox{
   max-width:500px;
   margin:40px auto;
-  background:#0a0a0a;
-  padding:20px;
-  border-radius:12px;
-  color:#0ff;
+  background:#0a0a0a; color:#0ff;
+  padding:20px; border-radius:12px;
 }
-.user-card{
-  background:#111;
-  padding:10px;
-  border-radius:8px;
-  margin:8px 0;
+.userCard{
+  background:#111; padding:8px;
+  margin:6px 0; border-radius:6px;
 }
 </style>
 </head>
+
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen">
-  <div id="login-box">
+<div id="loginScreen">
+  <div id="loginBox">
     <h2>🔐 Login</h2>
     <input id="user" placeholder="Usuário">
     <input id="pass" type="password" placeholder="Senha">
@@ -157,27 +98,17 @@ th{text-align:left}
   </div>
 
   <div class="container">
-    <h1>Gerador de Tabela de Logaritmos</h1>
-
     <div class="row">
-      <div>
-        <label>Início</label>
-        <input id="start" type="number" value="1">
-      </div>
-      <div>
-        <label>Fim</label>
-        <input id="end" type="number" value="10">
-      </div>
+      <input id="start" type="number" value="1">
+      <input id="end" type="number" value="10">
     </div>
 
-    <label>Base</label>
     <select id="base">
-      <option value="10">10</option>
-      <option value="e">e</option>
-      <option value="2">2</option>
+      <option value="10">Base 10</option>
+      <option value="e">Base e</option>
+      <option value="2">Base 2</option>
     </select>
 
-    <label>Casas decimais</label>
     <input id="precision" type="number" value="3">
 
     <button onclick="gerar()">Gerar</button>
@@ -188,59 +119,62 @@ th{text-align:left}
 </div>
 
 <!-- ADMIN -->
-<div id="admin-panel">
-  <div class="admin-box">
+<div id="adminPanel">
+  <div class="adminBox">
     <button onclick="fecharAdmin()">❌</button>
-    <h2>Painel Admin</h2>
+    <h3>Painel Admin</h3>
     <div id="listaUsuarios"></div>
     <input id="novoUser" placeholder="Novo usuário">
     <input id="novoPass" placeholder="Senha">
-    <button onclick="criarUsuario()">Criar usuário</button>
+    <button onclick="criarUsuario()">Criar</button>
   </div>
 </div>
 
 <script>
-/* ===== BANCO ===== */
+// ===== BANCO =====
 let banco = JSON.parse(localStorage.getItem("usuarios")) || {};
 if(!banco.CLX){
   banco.CLX = {senha:"02072007", bloqueado:false};
   localStorage.setItem("usuarios", JSON.stringify(banco));
 }
 
-/* ===== LOGIN AUTO ===== */
+// ===== AUTO LOGIN =====
 document.addEventListener("DOMContentLoaded", ()=>{
   const logado = localStorage.getItem("logado");
   if(logado){
-    login-screen.style.display="none";
-    main.style.display="block";
-    if(logado==="CLX") adminBtn.style.display="inline";
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("main").style.display="block";
+    if(logado==="CLX"){
+      document.getElementById("adminBtn").style.display="inline";
+    }
   }
 });
 
-/* ===== LOGIN ===== */
+// ===== LOGIN =====
 function login(){
-  const u = user.value.trim();
-  const p = pass.value;
+  const u = document.getElementById("user").value.trim();
+  const p = document.getElementById("pass").value;
   banco = JSON.parse(localStorage.getItem("usuarios"));
 
   if(!banco[u]) return alert("Usuário não existe");
-  if(banco[u].senha!==p) return alert("Senha incorreta");
-  if(banco[u].bloqueado) return alert("Usuário bloqueado");
+  if(banco[u].senha !== p) return alert("Senha incorreta");
 
   localStorage.setItem("logado",u);
-  login-screen.style.display="none";
-  main.style.display="block";
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("main").style.display="block";
 
-  if(u==="CLX") adminBtn.style.display="inline";
+  if(u==="CLX"){
+    document.getElementById("adminBtn").style.display="inline";
+  }
 }
 
-/* ===== SAIR ===== */
+// ===== SAIR =====
 function sair(){
   localStorage.removeItem("logado");
   location.reload();
 }
 
-/* ===== GERADOR ===== */
+// ===== GERADOR =====
 function gerar(){
   let s=+start.value, e=+end.value;
   let b=base.value==="e"?Math.E:+base.value;
@@ -262,20 +196,20 @@ function baixar(){
   XLSX.writeFile(wb,"logaritmos.xlsx");
 }
 
-/* ===== ADMIN ===== */
+// ===== ADMIN =====
 function abrirAdmin(){
   atualizarUsuarios();
-  admin-panel.style.display="block";
+  document.getElementById("adminPanel").style.display="block";
 }
 function fecharAdmin(){
-  admin-panel.style.display="none";
+  document.getElementById("adminPanel").style.display="none";
 }
 function atualizarUsuarios(){
-  banco=JSON.parse(localStorage.getItem("usuarios"));
+  banco = JSON.parse(localStorage.getItem("usuarios"));
   listaUsuarios.innerHTML="";
   for(let u in banco){
     listaUsuarios.innerHTML+=`
-      <div class="user-card">
+      <div class="userCard">
         ${u}
         ${u!=="CLX"?`<button onclick="excluirUsuario('${u}')">Excluir</button>`:""}
       </div>`;
@@ -292,5 +226,6 @@ function excluirUsuario(u){
   atualizarUsuarios();
 }
 </script>
+
 </body>
 </html>
