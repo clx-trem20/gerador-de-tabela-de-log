@@ -1,15 +1,14 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sistema CLX</title>
+<title>Gerador de Logaritmos CLX</title>
 
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
 body{margin:0;background:#f3f4f6;color:#111}
 
-/* ===== LOGIN ===== */
+/* LOGIN */
 #login-screen{
   position:fixed;
   inset:0;
@@ -26,7 +25,7 @@ body{margin:0;background:#f3f4f6;color:#111}
   width:320px;
   box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
-.login-box h2{text-align:center;margin-bottom:15px}
+.login-box h2{text-align:center}
 .login-box input{
   width:100%;
   padding:10px;
@@ -37,50 +36,34 @@ body{margin:0;background:#f3f4f6;color:#111}
 .login-box button{
   width:100%;
   padding:10px;
-  margin-top:10px;
   background:#2563eb;
+  color:#fff;
   border:none;
   border-radius:8px;
-  color:#fff;
-  font-weight:600;
   cursor:pointer;
+  font-weight:600;
 }
 
-/* ===== SITE ===== */
+/* SITE */
+#main{display:none}
 .container{
   max-width:900px;
   margin:40px auto;
   padding:24px;
-  background:white;
+  background:#fff;
   border-radius:12px;
-  box-shadow:0 6px 24px rgba(2,6,23,0.08)
-}
-h1{font-size:20px}
-label{font-size:13px;display:block;margin-top:10px}
-input,select{
-  width:100%;
-  padding:8px;
-  margin-top:6px;
-  border-radius:6px;
-  border:1px solid #d1d5db
+  box-shadow:0 6px 24px rgba(2,6,23,.08)
 }
 .row{display:flex;gap:12px}
 .row>*{flex:1}
-button{
-  margin-top:14px;
-  padding:10px;
-  border-radius:8px;
-  border:0;
-  background:#2563eb;
-  color:#fff;
-  cursor:pointer;
-  font-weight:600
-}
-table{width:100%;margin-top:18px;border-collapse:collapse}
+label{font-size:13px;display:block;margin-top:10px}
+input,select{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #d1d5db}
+button{margin-top:14px;padding:10px;border-radius:8px;border:0;background:#2563eb;color:#fff;font-weight:600;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:18px}
 th,td{padding:6px;border-bottom:1px solid #e5e7eb;text-align:right}
 th{text-align:left}
 
-/* ===== FOOTER ===== */
+/* FOOTER */
 footer{
   margin-top:30px;
   text-align:center;
@@ -94,11 +77,6 @@ footer strong{color:#2563eb}
   from{opacity:0;transform:translateY(10px)}
   to{opacity:1;transform:translateY(0)}
 }
-
-/* ===== ADMIN ===== */
-#adminBtn{display:none;background:#111827}
-#admin-panel{display:none}
-
 </style>
 
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -106,18 +84,18 @@ footer strong{color:#2563eb}
 
 <body>
 
-<!-- ===== LOGIN ===== -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <h2>Login</h2>
+    <h2>🔐 Login</h2>
     <input id="user" placeholder="Usuário">
     <input id="pass" type="password" placeholder="Senha">
     <button onclick="login()">Entrar</button>
   </div>
 </div>
 
-<!-- ===== SITE ===== -->
-<div id="main" style="display:none">
+<!-- SITE -->
+<div id="main">
   <div class="container">
 
     <h1>Gerador de Tabela de Logaritmos</h1>
@@ -155,8 +133,6 @@ footer strong{color:#2563eb}
 
     <div class="preview" id="preview"></div>
 
-    <button id="adminBtn" onclick="admin()">Painel Admin</button>
-
     <footer>
       ✨ Criado por <strong>CLX</strong> © <span id="ano"></span>
     </footer>
@@ -164,51 +140,47 @@ footer strong{color:#2563eb}
   </div>
 </div>
 
-<!-- ===== ADMIN ===== -->
-<div id="admin-panel" class="container">
-  <h2>Painel Admin</h2>
-  <button onclick="logout()">Sair</button>
-</div>
-
 <script>
-document.getElementById("ano").textContent=new Date().getFullYear();
+/* ANO AUTOMÁTICO */
+document.getElementById("ano").textContent = new Date().getFullYear();
 
-// ===== USUÁRIOS =====
-const usuarios={
-  "CLX":{senha:"02072007"}
+/* USUÁRIOS */
+const usuarios = {
+  CLX: "02072007"
 };
 
-// ===== LOGIN =====
+/* LOGIN */
 function login(){
-  if(user.value in usuarios && usuarios[user.value].senha===pass.value){
-    localStorage.setItem("logado",user.value);
-    login-screen.style.display="none";
-    main.style.display="block";
-    if(user.value==="CLX") adminBtn.style.display="block";
-  }else alert("Login inválido");
+  const u = document.getElementById("user").value;
+  const p = document.getElementById("pass").value;
+
+  if(usuarios[u] && usuarios[u] === p){
+    localStorage.setItem("logado", u);
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("main").style.display = "block";
+  } else {
+    alert("Usuário ou senha incorretos");
+  }
 }
 
-// ===== AUTO LOGIN =====
+/* AUTO LOGIN */
 if(localStorage.getItem("logado")){
-  login-screen.style.display="none";
-  main.style.display="block";
-  if(localStorage.getItem("logado")==="CLX") adminBtn.style.display="block";
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("main").style.display = "block";
 }
 
-// ===== LOGOUT =====
-function logout(){
-  localStorage.removeItem("logado");
-  location.reload();
-}
-
-// ===== LOGARITMOS =====
+/* GERADOR */
 function gerar(){
+  let base = document.getElementById("base").value;
+  if(base==="e") base = Math.E;
+  if(base==="other") base = document.getElementById("otherBase").value;
+
   let html="<table><tr><th>n</th><th>log</th></tr>";
   for(let i=start.value;i<=end.value;i++){
-    html+=`<tr><td>${i}</td><td>${(Math.log(i)/Math.log(base.value==="e"?Math.E:base.value==="other"?otherBase.value:base.value)).toFixed(precision.value)}</td></tr>`;
+    html+=`<tr><td>${i}</td><td>${(Math.log(i)/Math.log(base)).toFixed(precision.value)}</td></tr>`;
   }
   html+="</table>";
-  preview.innerHTML=html;
+  preview.innerHTML = html;
 }
 
 function baixar(){
@@ -216,10 +188,10 @@ function baixar(){
   for(let i=start.value;i<=end.value;i++){
     rows.push({n:i,log:(Math.log(i)/Math.log(base.value==="e"?Math.E:base.value==="other"?otherBase.value:base.value)).toFixed(precision.value)});
   }
-  const ws=XLSX.utils.json_to_sheet(rows);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"log");
-  XLSX.writeFile(wb,"tabela_log.xlsx");
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "log");
+  XLSX.writeFile(wb, "tabela_log.xlsx");
 }
 </script>
 
