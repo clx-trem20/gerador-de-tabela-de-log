@@ -102,24 +102,24 @@ th,td{border-bottom:1px solid #ddd; padding:6px}
       <input id="start" type="number" value="1">
       <input id="end" type="number" value="10">
     </div>
-
+    <label>Base do log</label>
     <select id="base">
-      <option value="10">Base 10</option>
-      <option value="e">Base e</option>
-      <option value="2">Base 2</option>
+      <option value="10">10</option>
+      <option value="2">2</option>
+      <option value="e">e</option>
+      <option value="other">Outra</option>
     </select>
-
+    <div id="otherBaseWrap">
+      <input id="otherBase" placeholder="Digite a base">
+    </div>
     <input id="precision" type="number" value="3">
-
     <button onclick="gerar()">Gerar</button>
     <button onclick="baixar()">Baixar Excel</button>
-
     <div id="preview"></div>
 
   <footer>
       ✨ Criado por <strong>CLX</strong> © <span id="ano"></span>
     </footer>
-  </div>
   </div>
 </div>
 
