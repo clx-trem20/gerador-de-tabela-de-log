@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -58,18 +59,15 @@ th,td{border-bottom:1px solid #ddd; padding:6px}
 /* ADMIN */
 #adminPanel{
   position:fixed; inset:0;
-  background:rgba(0,0,0,0.95);
+  background:rgba(0,0,0,.95);
   display:none; z-index:2000;
 }
 .adminBox{
   max-width:500px;
   margin:40px auto;
   background:#0a0a0a; color:#0ff;
-  padding:20px; border-radius:12px;
-}
-.userCard{
-  background:#111; padding:8px;
-  margin:6px 0; border-radius:6px;
+  padding:20px;
+  border-radius:12px;
 }
 </style>
 </head>
@@ -117,113 +115,98 @@ th,td{border-bottom:1px solid #ddd; padding:6px}
   </div>
 </div>
 
-<!-- ADMIN -->
+<!-- PAINEL ADMIN -->
 <div id="adminPanel">
   <div class="adminBox">
     <button onclick="fecharAdmin()">❌</button>
-    <h3>Painel Admin</h3>
-    <div id="listaUsuarios"></div>
-    <input id="novoUser" placeholder="Novo usuário">
-    <input id="novoPass" placeholder="Senha">
-    <button onclick="criarUsuario()">Criar</button>
+    <h3>⚙️ Painel Admin</h3>
+
+    <input id="novaSenha" type="password" placeholder="Nova senha">
+    <button onclick="trocarSenha()">Salvar nova senha</button>
+
+    <p style="font-size:12px;margin-top:10px">
+      🔒 Senha protegida com hash
+    </p>
   </div>
 </div>
 
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, addDoc, collection, serverTimestamp }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCq7EmnBjUTO7WwFQYUERg9huJ4V2VLN8I",
+  authDomain: "gerado-de-log.firebaseapp.com",
+  projectId: "gerado-de-log",
+  storageBucket: "gerado-de-log.firebasestorage.app",
+  messagingSenderId: "884275714766",
+  appId: "1:884275714766:web:616fb069a0db82eb880e9f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* HASH */
+async function hashSenha(t){
+  const d=new TextEncoder().encode(t);
+  const h=await crypto.subtle.digest("SHA-256",d);
+  return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+window.login = async function(){
+  const ref=doc(db,"config","admin");
+  const snap=await getDoc(ref);
+  if(!snap.exists()) return alert("Config não encontrada");
+
+  const dados=snap.data();
+  if(user.value===dados.usuario && await hashSenha(pass.value)===dados.senha){
+    loginScreen.style.display="none";
+    main.style.display="block";
+    adminBtn.style.display="inline";
+    localStorage.setItem("logado","1");
+  }else alert("Login inválido");
+}
+
+window.trocarSenha = async function(){
+  const h=await hashSenha(novaSenha.value);
+  await updateDoc(doc(db,"config","admin"),{senha:h});
+  alert("Senha alterada");
+  novaSenha.value="";
+}
+
+window.salvarHistorico = async function(d){
+  await addDoc(collection(db,"historico"),{...d,data:serverTimestamp()});
+}
+
+window.sair=()=>{localStorage.clear();location.reload();}
+window.abrirAdmin=()=>adminPanel.style.display="block";
+window.fecharAdmin=()=>adminPanel.style.display="none";
+
+if(localStorage.getItem("logado")){
+  loginScreen.style.display="none";
+  main.style.display="block";
+  adminBtn.style.display="inline";
+}
+</script>
+
 <script>
-// ===== BANCO =====
-let banco = JSON.parse(localStorage.getItem("usuarios")) || {};
-if(!banco.CLX){
-  banco.CLX = {senha:"02072007", bloqueado:false};
-  localStorage.setItem("usuarios", JSON.stringify(banco));
-}
-
-// ===== AUTO LOGIN =====
-document.addEventListener("DOMContentLoaded", ()=>{
-  const logado = localStorage.getItem("logado");
-  if(logado){
-    document.getElementById("loginScreen").style.display="none";
-    document.getElementById("main").style.display="block";
-    if(logado==="CLX"){
-      document.getElementById("adminBtn").style.display="inline";
-    }
-  }
-});
-
-// ===== LOGIN =====
-function login(){
-  const u = document.getElementById("user").value.trim();
-  const p = document.getElementById("pass").value;
-  banco = JSON.parse(localStorage.getItem("usuarios"));
-
-  if(!banco[u]) return alert("Usuário não existe");
-  if(banco[u].senha !== p) return alert("Senha incorreta");
-
-  localStorage.setItem("logado",u);
-  document.getElementById("loginScreen").style.display="none";
-  document.getElementById("main").style.display="block";
-
-  if(u==="CLX"){
-    document.getElementById("adminBtn").style.display="inline";
-  }
-}
-
-// ===== SAIR =====
-function sair(){
-  localStorage.removeItem("logado");
-  location.reload();
-}
-
-// ===== GERADOR =====
 function gerar(){
-  let s=+start.value, e=+end.value;
+  let s=+start.value,e=+end.value;
   let b=base.value==="e"?Math.E:+base.value;
   let p=+precision.value;
+  let h=[];
   let html="<table><tr><th>n</th><th>log</th></tr>";
   for(let i=s;i<=e;i++){
-    html+=`<tr><td>${i}</td><td>${(Math.log(i)/Math.log(b)).toFixed(p)}</td></tr>`;
+    const v=(Math.log(i)/Math.log(b)).toFixed(p);
+    html+=`<tr><td>${i}</td><td>${v}</td></tr>`;
+    h.push({n:i,log:v});
   }
-  html+="</table>";
   preview.innerHTML=html;
+  salvarHistorico({inicio:s,fim:e,base:b,resultado:h});
 }
-function baixar(){
-  gerar();
-  const rows=[...preview.querySelectorAll("tr")]
-    .slice(1).map(r=>({n:r.cells[0].innerText,log:r.cells[1].innerText}));
-  const ws=XLSX.utils.json_to_sheet(rows);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"log");
-  XLSX.writeFile(wb,"logaritmos.xlsx");
-}
-
-// ===== ADMIN =====
-function abrirAdmin(){
-  atualizarUsuarios();
-  document.getElementById("adminPanel").style.display="block";
-}
-function fecharAdmin(){
-  document.getElementById("adminPanel").style.display="none";
-}
-function atualizarUsuarios(){
-  banco = JSON.parse(localStorage.getItem("usuarios"));
-  listaUsuarios.innerHTML="";
-  for(let u in banco){
-    listaUsuarios.innerHTML+=`
-      <div class="userCard">
-        ${u}
-        ${u!=="CLX"?`<button onclick="excluirUsuario('${u}')">Excluir</button>`:""}
-      </div>`;
-  }
-}
-function criarUsuario(){
-  banco[novoUser.value]={senha:novoPass.value,bloqueado:false};
-  localStorage.setItem("usuarios",JSON.stringify(banco));
-  atualizarUsuarios();
-}
-function excluirUsuario(u){
-  delete banco[u];
-  localStorage.setItem("usuarios",JSON.stringify(banco));
-  atualizarUsuarios();
-}
+function baixar(){gerar();XLSX.writeFile(XLSX.utils.book_new(),"log.xlsx")}
 </script>
 
 </body>
