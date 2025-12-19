@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -22,29 +21,38 @@ body{margin:0;font-family:Arial;background:#f3f4f6}
 #loginBox input{
   width:90%; padding:10px; margin:8px 0;
 }
+#loginBox button{width:95%;padding:10px;cursor:pointer}
 .topbar{
   background:#000; color:#0ff;
   padding:10px 20px;
   display:flex; justify-content:space-between;
 }
 #main{display:none}
-.container{max-width:900px;margin:40px auto;background:white;padding:24px}
+.container{
+  max-width:900px;
+  margin:40px auto;
+  background:white;
+  padding:24px;
+  border-radius:12px;
+}
 #adminPanel{
   position:fixed; inset:0;
-  background:rgba(0,0,0,.9);
-  display:none;
+  background:rgba(0,0,0,.95);
+  display:none; z-index:2000;
 }
 .adminBox{
   background:#111;color:#0ff;
   max-width:400px;
   margin:40px auto;
   padding:20px;
+  border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <div id="loginBox">
     <h2>🔐 Login</h2>
@@ -54,6 +62,7 @@ body{margin:0;font-family:Arial;background:#f3f4f6}
   </div>
 </div>
 
+<!-- SISTEMA -->
 <div id="main">
   <div class="topbar">
     <span>📊 Gerador de Logaritmos</span>
@@ -77,26 +86,27 @@ body{margin:0;font-family:Arial;background:#f3f4f6}
   </div>
 </div>
 
+<!-- ADMIN -->
 <div id="adminPanel">
   <div class="adminBox">
     <button id="fecharAdmin">❌</button>
     <h3>Trocar senha</h3>
-    <input id="novaSenha" type="password">
+    <input id="novaSenha" type="password" placeholder="Nova senha">
     <button id="salvarSenha">Salvar</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc } 
+import { getFirestore, doc, setDoc, getDoc, updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyCq7EmnBjUTO7WwFQYUERg9huJ4V2VLN8I",
   authDomain: "gerado-de-log.firebaseapp.com",
   projectId: "gerado-de-log"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -116,14 +126,34 @@ async function hashSenha(txt){
     .map(b=>b.toString(16).padStart(2,"0")).join("");
 }
 
+/* CRIA ADMIN SE NÃO EXISTIR */
+const ADMIN_USER = "clx";
+const ADMIN_PASS = "0110";
+
+(async ()=>{
+  const ref = doc(db,"config","admin");
+  const snap = await getDoc(ref);
+
+  if(!snap.exists()){
+    await setDoc(ref,{
+      usuario: ADMIN_USER,
+      senha: await hashSenha(ADMIN_PASS)
+    });
+  }
+
+  if(localStorage.getItem("logado")==="1"){
+    loginScreen.style.display="none";
+    main.style.display="block";
+    adminBtn.style.display="inline";
+  }
+})();
+
 /* LOGIN */
 document.getElementById("btnLogin").onclick = async ()=>{
-  const u = user.value;
+  const u = user.value.trim().toLowerCase();
   const p = await hashSenha(pass.value);
 
   const snap = await getDoc(doc(db,"config","admin"));
-  if(!snap.exists()) return alert("Config não encontrada");
-
   const dados = snap.data();
 
   if(u===dados.usuario && p===dados.senha){
@@ -132,7 +162,7 @@ document.getElementById("btnLogin").onclick = async ()=>{
     main.style.display="block";
     adminBtn.style.display="inline";
   }else{
-    alert("Login inválido");
+    alert("Usuário ou senha incorretos");
   }
 };
 
@@ -148,8 +178,12 @@ document.getElementById("fecharAdmin").onclick = ()=>{
   adminPanel.style.display="none";
 };
 document.getElementById("salvarSenha").onclick = async ()=>{
-  const h = await hashSenha(novaSenha.value);
-  await updateDoc(doc(db,"config","admin"),{senha:h});
+  const nova = novaSenha.value;
+  if(!nova) return alert("Digite a senha");
+
+  await updateDoc(doc(db,"config","admin"),{
+    senha: await hashSenha(nova)
+  });
   alert("Senha alterada");
   novaSenha.value="";
 };
